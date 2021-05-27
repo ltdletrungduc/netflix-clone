@@ -59,8 +59,8 @@ export const StyledDiv = styled.div`
 		top: 0;
 		left: 0;
 		animation: ${opacity};
-		animation-delay: 0.8s;
-		animation-duration: 0.4s;
+		animation-delay: 0.2s;
+		animation-duration: 0.8s;
 		animation-fill-mode: forwards;
 		animation-direction: reverse;
 		z-index: 1;
