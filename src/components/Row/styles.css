@@ -20,7 +20,6 @@
 
 .row__movies .flickity-viewport {
 	overflow: initial;
-	min-height: 100px;
 }
 
 .row__movies .flickity-button {

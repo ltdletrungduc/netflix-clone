@@ -29,6 +29,7 @@ Y/
 **/.firebaserc
 /.firebase
 firebase.json
+.firebaserc
 
 ### Firebase Patch ###
 .runtimeconfig.json
