@@ -27,10 +27,13 @@ yarn-error.log*
 Y/
 **/node_modules/*
 **/.firebaserc
+/.firebase
+firebase.json
 
 ### Firebase Patch ###
 .runtimeconfig.json
 .firebase/
+
 
 ### Ignore Prettier
 .prettierignore
