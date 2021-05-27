@@ -1,15 +1,8 @@
 import React, { useEffect, useRef, useState } from "react";
-import { services } from "../../services";
 import * as S from "./styles";
 
-const Movie = ({ movie, isLargeRow, openCallback }) => {
+const Movie = ({ children, movie, isLargeRow, openCallback }) => {
 	// WILL MOUNT
-	let posterSrc = null;
-	if (isLargeRow) {
-		posterSrc = `${services.imagesConfig.base_url}${services.imagesConfig.poster_sizes[3]}${movie.poster_path}`;
-	} else {
-		posterSrc = `${services.imagesConfig.base_url}${services.imagesConfig.backdrop_sizes[0]}${movie.backdrop_path}`;
-	}
 
 	const handleClick = () => {
 		openCallback(movie);
@@ -19,11 +12,7 @@ const Movie = ({ movie, isLargeRow, openCallback }) => {
 			title={movie.title ? movie.title : movie.original_title}
 			className={`movie ${isLargeRow ? "--large" : "--normal"}`}
 			onClick={handleClick}>
-			<img
-				className='movie__poster'
-				src={posterSrc}
-				alt={movie.title ? movie.title : movie.original_title}
-			/>
+			{children}
 			{!isLargeRow ? (
 				<div className='movie__title'>
 					{movie.title

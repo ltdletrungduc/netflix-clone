@@ -2,6 +2,7 @@ import React from "react";
 import ReactDOM from "react-dom";
 import Flickity from "flickity";
 import "flickity/dist/flickity.min.css";
+import "flickity-imagesloaded/flickity-imagesloaded";
 
 export default class Slider extends React.Component {
 	constructor(props) {
@@ -15,7 +16,10 @@ export default class Slider extends React.Component {
 	}
 
 	componentDidMount() {
-		this.flickity = new Flickity(this.flickityNode, this.props.options || {});
+		this.flickity = new Flickity(
+			this.flickityNode,
+			{ ...this.props.options, imagesLoaded: true } || {}
+		);
 
 		this.setState({
 			flickityReady: true,

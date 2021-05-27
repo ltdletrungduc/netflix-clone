@@ -1,5 +1,4 @@
-import React, { useState, useEffect, useContext } from "react";
-import useHover from "../../hooks/useHover";
+import React, { useState, useEffect, useContext, useRef } from "react";
 import { axios, services } from "../../services";
 import "./styles.css";
 import Slider from "../Slider";
@@ -68,6 +67,9 @@ function Row({ title, fetchUrl, isLargeRow }) {
 		rightToLeft: false,
 		// enables right-to-left layout
 
+		imagesLoaded: true,
+		// CATCH unloaded images
+
 		setGallerySize: true,
 		// sets the height of gallery
 		// disable if gallery already has height set with CSS
@@ -84,6 +86,12 @@ function Row({ title, fetchUrl, isLargeRow }) {
 	const [movies, setMovies] = useState([]);
 	const url = `${services.API_base_url}${fetchUrl}`;
 	const open = useContext(ModalContext);
+	const sliderRef = useRef(null);
+
+	const handleLoadImage = () => {
+		sliderRef.current.refreshFlickity();
+	};
+
 	useEffect(() => {
 		const fetchData = async () => {
 			setError(false);
@@ -107,13 +115,27 @@ function Row({ title, fetchUrl, isLargeRow }) {
 		return (
 			<div className={`row ${isLargeRow ? "--large" : "--normal"}`}>
 				<h2 className='row__title'>{title}</h2>
-				<Slider className='row__movies' options={flickityOption}>
+				<Slider
+					className='row__movies'
+					options={flickityOption}
+					ref={sliderRef}>
 					{movies.map((movie) => (
 						<Movie
 							movie={movie}
 							isLargeRow={isLargeRow}
 							key={movie.id}
-							openCallback={open}></Movie>
+							openCallback={open}>
+							<img
+								className='movie__poster'
+								src={
+									isLargeRow
+										? `${services.imagesConfig.base_url}${services.imagesConfig.poster_sizes[3]}${movie.poster_path}`
+										: `${services.imagesConfig.base_url}${services.imagesConfig.backdrop_sizes[0]}${movie.backdrop_path}`
+								}
+								alt={movie.title ? movie.title : movie.original_title}
+								onLoad={handleLoadImage}
+							/>
+						</Movie>
 					))}
 				</Slider>
 			</div>
