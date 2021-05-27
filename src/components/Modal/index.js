@@ -1,102 +1,87 @@
-import React, {
-	useEffect,
-	useImperativeHandle,
-	useState,
-	forwardRef,
-	useCallback,
-} from "react";
-import { createPortal } from "react-dom";
-import "./styles.css";
-import * as S from "./styles";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import ReactPlayer from "react-player";
+import ModalContext from "./ModalContext";
+import Portal from "../Portal";
+import * as S from "./styles";
 
-const modalElement = document.getElementById("portal-root");
-function Modal({ children }, ref) {
+const mockVideoURL = "./video.mp4";
+
+const Modal = ({ children }) => {
 	const [isOpen, setIsOpen] = useState(false);
-	const [coords, setCoords] = useState({});
-	const [play, setPlay] = useState(false);
-	// // call it to close the modal
+	const [isPlay, setIsPlay] = useState(false);
+	const modalRef = useRef(null);
 
-	const close = useCallback(() => {
-		setPlay(false);
-		setTimeout(() => {
-			setIsOpen(false);
-		}, 800);
-	}, []);
-	// // call it to open the modal
-	const open = useCallback(() => {
+	const open = (movie) => {
+		openAnimation();
+	};
+
+	const closeAnimation = () => {
+		setIsPlay(false);
+		setIsOpen(false);
+	};
+
+	const openAnimation = () => {
 		setIsOpen(true);
 		setTimeout(() => {
-			setPlay(true);
+			setIsPlay(true);
 		}, 800);
-	}, []);
+	};
+	const handleClickOut = (events) => {
+		const node = modalRef.current;
+		if (node && node.contains(events.target)) {
+			return;
+		}
+		closeAnimation();
+	};
 
-	useImperativeHandle(
-		ref,
-		() => ({
-			open,
-			close,
-			setCoords,
-		}),
-		[close]
-	);
-
-	//   handle ESCAPE key press
+	//  BLOCK:  handle ESCAPE key press
 	const handleEscape = useCallback(
 		(event) => {
-			if (event.keyCode === 27) close();
+			if (event.keyCode === 27) closeAnimation();
 		},
-		[close]
+		[closeAnimation]
 	);
-
 	useEffect(() => {
-		if (isOpen) document.addEventListener("keydown", handleEscape, false);
+		if (isOpen) {
+			document.addEventListener("keydown", handleEscape, false);
+			document.addEventListener("mousedown", handleClickOut, false);
+		}
 		return () => {
 			document.removeEventListener("keydown", handleEscape, false);
+			document.removeEventListener("mousedown", handleClickOut, false);
 		};
-	}, [handleEscape, isOpen]);
+	}, [handleEscape, handleClickOut, isOpen]);
+	// end of BLOCK
 
-	const urlStatic = "./video.mp4";
-	return createPortal(
-		isOpen ? (
-			<S.StyledDiv
-				onMouseLeave={close}
-				className='modal'
-				width={coords.width}
-				height={coords.height}
-				top={coords.top}
-				left={coords.left}
-				right={coords.right}
-			>
-				{/* <Iframe iframe={iframeConfig} allow='autoplay'></Iframe> */}
-				{play ? (
-					<ReactPlayer
-						width={coords.height * 1.778}
-						height={coords.height}
-						className='video-player'
-						playing
-						url={[urlStatic]}
-					/>
-				) : null}
-				<span
-					role='button'
-					className='modal-close'
-					aria-label='close'
-					onClick={close}
-				>
-					x
-				</span>
-				{children}
-			</S.StyledDiv>
-		) : null,
-		modalElement
+	return (
+		<ModalContext.Provider value={open}>
+			{isOpen ? (
+				<Portal>
+					<S.StyledDiv className='modal' ref={modalRef}>
+						{isPlay ? (
+							<div className='player-wrapper'>
+								<ReactPlayer
+									className='video-player'
+									playing={isPlay}
+									width='100%'
+									height='100%'
+									url={[mockVideoURL]}
+								/>
+								<span
+									role='button'
+									className='modal-close'
+									aria-label='close'
+									onClick={closeAnimation}>
+									x
+								</span>
+							</div>
+						) : null}
+					</S.StyledDiv>
+				</Portal>
+			) : null}
+			{children}
+		</ModalContext.Provider>
 	);
-}
-// function Iframe(props) {
-// 	return (
-// 		<div
-// 			dangerouslySetInnerHTML={{ __html: props.iframe ? props.iframe : "" }}
-// 		/>
-// 	);
-// }
-export default forwardRef(Modal);
+};
+
+export default Modal;

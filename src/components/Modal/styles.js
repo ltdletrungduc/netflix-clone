@@ -1,12 +1,12 @@
 import styled, { keyframes } from "styled-components";
 
-const scale = keyframes`
+const openAnimation = keyframes`
   from {
-    transform: scale(1)
+   top: 150%;
   }
 
   to {
-    transform: scale(1.2, 1.2)
+   top:50%
   }
 `;
 const opacity = keyframes`
@@ -20,33 +20,17 @@ from {
 `;
 
 export const StyledDiv = styled.div`
-	position: absolute;
-	width: ${(props) => (props.width ? `${props.width}px` : "100px")};
-	height: ${(props) => (props.height ? `${props.height}px` : "100px")};
-	top: ${(props) => (props.top ? `${props.top}px` : "0")};
-	left: ${(props) => (props.left ? `${props.left}px` : "0")};
-	transform-origin: ${(props) =>
-		props.left <= 60
-			? "left center"
-			: props.right <= 60
-			? "right center"
-			: "center center"};
-	animation: ${scale};
+	position: fixed;
+	width: 800px;
+	height: 450px;
+	top: 50%;
+	left: 50%;
+	transform: translate(-50%, -50%);
+	animation: ${openAnimation};
 	animation-duration: 0.8s;
 	animation-fill-mode: forwards;
-	/* transform: scale(1.2); */
-	transition: 0.8s;
 	overflow: hidden;
-	z-index: 299;
-	&.--open {
-		transform: scale(1.2);
-	}
-	&.--close {
-		transform: scale(1);
-		.video-player {
-			animation-direction: normal;
-		}
-	}
+	z-index: 1;
 	.modal-close {
 		position: absolute;
 		z-index: 2;
@@ -54,21 +38,31 @@ export const StyledDiv = styled.div`
 		top: 0;
 		right: 10px;
 		transform: translateX(-50%);
-	}
-	img.poster {
-		width: 100%;
-	}
-	.video-player {
 		opacity: 0;
 		animation: ${opacity};
 		animation-delay: 0.8s;
 		animation-duration: 0.4s;
 		animation-fill-mode: forwards;
 		animation-direction: reverse;
+	}
+	img.poster {
+		width: 100%;
+	}
+	.player-wrapper {
+		position: relative;
+		padding-top: 56.25%;
+		z-index: 1;
+	}
+	.video-player {
+		opacity: 0;
 		position: absolute;
 		top: 0;
-		left: 50%;
-		transform: translateX(-50%);
+		left: 0;
+		animation: ${opacity};
+		animation-delay: 0.8s;
+		animation-duration: 0.4s;
+		animation-fill-mode: forwards;
+		animation-direction: reverse;
 		z-index: 1;
 	}
 	.modal__content {

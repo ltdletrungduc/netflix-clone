@@ -1,92 +1,68 @@
 import React from "react";
-import Flickity from "react-flickity-component";
+import ReactDOM from "react-dom";
+import Flickity from "flickity";
+import "flickity/dist/flickity.min.css";
 
-const Slider = ({ children, className }) => {
-	let options = {
-		// options, defaults listed
+export default class Slider extends React.Component {
+	constructor(props) {
+		super(props);
 
-		accessibility: false,
-		// enable keyboard navigation, pressing left & right keys
+		this.state = {
+			flickityReady: false,
+		};
 
-		adaptiveHeight: false,
-		// set carousel height to the selected slide
+		this.refreshFlickity = this.refreshFlickity.bind(this);
+	}
 
-		autoPlay: false,
-		// advances to the next cell
+	componentDidMount() {
+		this.flickity = new Flickity(this.flickityNode, this.props.options || {});
 
-		cellAlign: "left",
-		// alignment of cells, 'center', 'left', or 'right'
-		// or a decimal 0-1, 0 is beginning (left) of container, 1 is end (right)
+		this.setState({
+			flickityReady: true,
+		});
+	}
 
-		cellSelector: undefined,
-		// specify selector for cell elements
+	refreshFlickity() {
+		this.flickity.reloadCells();
+		this.flickity.resize();
+		this.flickity.updateDraggable();
+	}
 
-		contain: false,
-		// will contain cells to container
-		// so no excess scroll at beginning or end
-		// has no effect if wrapAround is enabled
+	componentWillUnmount() {
+		this.flickity.destroy();
+	}
 
-		draggable: false,
+	componentDidUpdate(prevProps, prevState) {
+		const flickityDidBecomeActive =
+			!prevState.flickityReady && this.state.flickityReady;
+		const childrenDidChange =
+			prevProps.children.length !== this.props.children.length;
 
-		dragThreshold: 3,
-		// number of pixels a user must scroll horizontally to start dragging
-		// increase to allow more room for vertical scroll for touch devices
-		// NOT EFFECT if draggable: false
+		if (flickityDidBecomeActive || childrenDidChange) {
+			this.refreshFlickity();
+		}
+	}
 
-		freeScroll: false,
-		// enables content to be freely scrolled and flicked
-		// without aligning cells
+	renderPortal() {
+		if (!this.flickityNode) {
+			return null;
+		}
 
-		friction: 0.5,
-		// smaller number = easier to flick farther
+		const mountNode = this.flickityNode.querySelector(".flickity-slider");
 
-		groupCells: true,
-		// group cells together in slides
+		if (mountNode) {
+			return ReactDOM.createPortal(this.props.children, mountNode);
+		}
+	}
 
-		initialIndex: 0,
-		// zero-based index of the initial selected cell
-
-		percentPosition: false,
-		// sets positioning in percent values, rather than pixels
-		// Enable if items have percent widths
-		// Disable if items have pixel widths, like images
-
-		prevNextButtons: true,
-		// creates and enables buttons to click to previous & next cells
-
-		pageDots: false,
-		// create and enable page dots
-
-		resize: true,
-		// listens to window resize events to adjust size & positions
-
-		rightToLeft: false,
-		// enables right-to-left layout
-
-		setGallerySize: false,
-		// sets the height of gallery
-		// disable if gallery already has height set with CSS
-
-		watchCSS: false,
-		// watches the content of :after of the element
-		// activates if #element:after { content: 'flickity' }
-
-		wrapAround: false,
-		// at end of cells, wraps-around to first for infinite scrolling
-	};
-
-	return (
-		<Flickity
-			className={className}
-			elementType={"div"}
-			options={options}
-			disableImagesLoaded={false}
-			reloadOnUpdate
-			static={false}
-		>
-			{children}
-		</Flickity>
-	);
-};
-
-export default Slider;
+	render() {
+		return [
+			<div
+				className={this.props.className}
+				key='flickityBase'
+				ref={(node) => (this.flickityNode = node)}
+			/>,
+			this.renderPortal(),
+		].filter(Boolean);
+	}
+}

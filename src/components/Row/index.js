@@ -1,11 +1,10 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import useHover from "../../hooks/useHover";
 import { axios, services } from "../../services";
 import "./styles.css";
 import Slider from "../Slider";
-import Slider2 from "../Slider/index2";
-import Modal from "../Modal";
-import Portal from "../Portal";
+import Movie from "../Movie";
+import ModalContext from "../Modal/ModalContext";
 
 function Row({ title, fetchUrl, isLargeRow }) {
 	let flickityOption = {
@@ -69,7 +68,7 @@ function Row({ title, fetchUrl, isLargeRow }) {
 		rightToLeft: false,
 		// enables right-to-left layout
 
-		setGallerySize: false,
+		setGallerySize: true,
 		// sets the height of gallery
 		// disable if gallery already has height set with CSS
 
@@ -83,8 +82,8 @@ function Row({ title, fetchUrl, isLargeRow }) {
 	const [error, setError] = useState(null);
 	const [isLoaded, setIsLoaded] = useState(false);
 	const [movies, setMovies] = useState([]);
-	const option = services.imagesConfig;
 	const url = `${services.API_base_url}${fetchUrl}`;
+	const open = useContext(ModalContext);
 	useEffect(() => {
 		const fetchData = async () => {
 			setError(false);
@@ -108,87 +107,18 @@ function Row({ title, fetchUrl, isLargeRow }) {
 		return (
 			<div className={`row ${isLargeRow ? "--large" : "--normal"}`}>
 				<h2 className='row__title'>{title}</h2>
-				{/* <Slider
-					className='row__posters'
-					data-flickity='{ "setGallerySize": false }'
-				>
+				<Slider className='row__movies' options={flickityOption}>
 					{movies.map((movie) => (
 						<Movie
 							movie={movie}
 							isLargeRow={isLargeRow}
-							option={option}
 							key={movie.id}
-						></Movie>
+							openCallback={open}></Movie>
 					))}
-				</Slider> */}
-				<Slider2 className='row__posters' options={flickityOption}>
-					{movies.map((movie) => (
-						<Movie
-							movie={movie}
-							isLargeRow={isLargeRow}
-							option={option}
-							key={movie.id}
-						></Movie>
-					))}
-				</Slider2>
+				</Slider>
 			</div>
 		);
 	}
-}
-
-function Movie({ movie, isLargeRow, option }) {
-	const [hoverRef, isHover] = useHover();
-	const modalRef = useRef(null);
-	const posterSrc = isLargeRow
-		? `${option.base_url}${option.poster_sizes[3]}${movie.poster_path}`
-		: `${option.base_url}${option.poster_sizes[2]}${movie.poster_path}`;
-
-	useEffect(() => {
-		// if (isHover) {
-		// 	console.table([
-		// 		hoverRef.current.getBoundingClientRect().width,
-		// 		hoverRef.current.getBoundingClientRect().height,
-		// 		hoverRef.current.getBoundingClientRect().top,
-		// 		hoverRef.current.getBoundingClientRect().left,
-		// 	]);
-		// 	modalRef.current.setCoords({
-		// 		width: hoverRef.current.getBoundingClientRect().width,
-		// 		height: hoverRef.current.getBoundingClientRect().height,
-		// 		top: hoverRef.current.getBoundingClientRect().top + window.pageYOffset,
-		// 		left: hoverRef.current.getBoundingClientRect().left,
-		// 		right: hoverRef.current.getBoundingClientRect().right,
-		// 	});
-		// 	modalRef.current.open();
-		// }
-	}, [isHover]);
-	return (
-		<div
-			title={movie.title ? movie.title : movie.original_title}
-			className='row__poster'
-		>
-			<img
-				className='poster'
-				src={posterSrc}
-				alt={movie.title ? movie.title : movie.original_title}
-				ref={hoverRef}
-			/>
-			{/* <div className='content'>
-				<div className='title'>
-					{movie.title
-						? movie.title
-						: movie.name || movie.original_title || movie.original_name}
-				</div>
-			</div> */}
-			{/* <Modal ref={modalRef}>
-				<img
-					className='poster'
-					src={posterSrc}
-					alt={movie.title ? movie.title : movie.original_title}
-				/>
-				<div className='modal__content'>SOME TEXT</div>
-			</Modal> */}
-		</div>
-	);
 }
 
 export default Row;
